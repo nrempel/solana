@@ -308,9 +308,20 @@ mod test {
         };
         let lamports = 55;
 
+<<<<<<< HEAD
         let instructions =
             instruction::create_account(&keys[0], &keys[1], &authorized, &lockup, lamports);
         let message = Message::new(&instructions, None);
+=======
+        let instructions = instruction::create_account(
+            &from_pubkey,
+            &stake_pubkey,
+            &authorized,
+            &lockup,
+            lamports,
+        );
+        let mut message = Message::new(&instructions, None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_stake(&message.instructions[1], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -330,11 +341,38 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[1], &keys[0..2]).is_err());
 
         let instruction =
             instruction::authorize(&keys[1], &keys[0], &keys[3], StakeAuthorize::Staker, None);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_stake(
+            &message.instructions[1],
+            &AccountKeys::new(&message.account_keys[0..2], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_stake_authorize_ix() {
+        let stake_pubkey = Pubkey::new_unique();
+        let authorized_pubkey = Pubkey::new_unique();
+        let new_authorized_pubkey = Pubkey::new_unique();
+        let custodian_pubkey = Pubkey::new_unique();
+        let instruction = instruction::authorize(
+            &stake_pubkey,
+            &authorized_pubkey,
+            &new_authorized_pubkey,
+            StakeAuthorize::Staker,
+            None,
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -348,7 +386,19 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..2]).is_err());
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..2], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let instruction = instruction::authorize(
             &keys[2],
@@ -357,7 +407,7 @@ mod test {
             StakeAuthorize::Withdrawer,
             Some(&keys[1]),
         );
-        let message = Message::new(&[instruction], None);
+        let mut message = Message::new(&[instruction], None);
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..4]).unwrap(),
             ParsedInstructionEnum {
@@ -372,10 +422,32 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..2]).is_err());
 
         let instruction = instruction::delegate_stake(&keys[1], &keys[0], &keys[2]);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..2], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_stake_delegate_ix() {
+        let stake_pubkey = Pubkey::new_unique();
+        let authorized_pubkey = Pubkey::new_unique();
+        let vote_pubkey = Pubkey::new_unique();
+        let instruction =
+            instruction::delegate_stake(&stake_pubkey, &authorized_pubkey, &vote_pubkey);
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..6]).unwrap(),
             ParsedInstructionEnum {
@@ -390,6 +462,7 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..5]).is_err());
 
         // This looks wrong, but in an actual compiled instruction, the order is:
@@ -398,6 +471,31 @@ mod test {
         //  * stake account
         let instructions = instruction::split(&keys[2], &keys[1], lamports, &keys[0]);
         let message = Message::new(&instructions, None);
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..5], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_stake_split_ix() {
+        let lamports = 55;
+        let stake_pubkey = Pubkey::new_unique();
+        let authorized_pubkey = Pubkey::new_unique();
+        let split_stake_pubkey = Pubkey::new_unique();
+        let instructions = instruction::split(
+            &stake_pubkey,
+            &authorized_pubkey,
+            lamports,
+            &split_stake_pubkey,
+        );
+        let mut message = Message::new(&instructions, None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_stake(&message.instructions[2], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -410,7 +508,19 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[2], &keys[0..2]).is_err());
+=======
+        assert!(parse_stake(
+            &message.instructions[2],
+            &AccountKeys::new(&message.account_keys[0..2], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let instruction = instruction::withdraw(&keys[1], &keys[0], &keys[2], lamports, None);
         let message = Message::new(&[instruction], None);
@@ -428,9 +538,20 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         let instruction =
             instruction::withdraw(&keys[2], &keys[0], &keys[3], lamports, Some(&keys[1]));
         let message = Message::new(&[instruction], None);
+=======
+        let instruction = instruction::withdraw(
+            &stake_pubkey,
+            &withdrawer_pubkey,
+            &to_pubkey,
+            lamports,
+            Some(&custodian_pubkey),
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..6]).unwrap(),
             ParsedInstructionEnum {
@@ -446,10 +567,30 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..4]).is_err());
 
         let instruction = instruction::deactivate_stake(&keys[1], &keys[0]);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..4], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_stake_deactivate_stake_ix() {
+        let stake_pubkey = Pubkey::new_unique();
+        let authorized_pubkey = Pubkey::new_unique();
+        let instruction = instruction::deactivate_stake(&stake_pubkey, &authorized_pubkey);
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -461,10 +602,34 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..2]).is_err());
 
         let instructions = instruction::merge(&keys[1], &keys[0], &keys[2]);
         let message = Message::new(&instructions, None);
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..2], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_stake_merge_ix() {
+        let destination_stake_pubkey = Pubkey::new_unique();
+        let source_stake_pubkey = Pubkey::new_unique();
+        let authorized_pubkey = Pubkey::new_unique();
+        let instructions = instruction::merge(
+            &destination_stake_pubkey,
+            &source_stake_pubkey,
+            &authorized_pubkey,
+        );
+        let mut message = Message::new(&instructions, None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..5]).unwrap(),
             ParsedInstructionEnum {
@@ -478,7 +643,27 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..4]).is_err());
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..4], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_stake_authorize_with_seed_ix() {
+        let stake_pubkey = Pubkey::new_unique();
+        let authority_base_pubkey = Pubkey::new_unique();
+        let authority_owner_pubkey = Pubkey::new_unique();
+        let new_authorized_pubkey = Pubkey::new_unique();
+        let custodian_pubkey = Pubkey::new_unique();
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let seed = "test_seed";
         let instruction = instruction::authorize_with_seed(
@@ -490,7 +675,7 @@ mod test {
             StakeAuthorize::Staker,
             None,
         );
-        let message = Message::new(&[instruction], None);
+        let mut message = Message::new(&[instruction], None);
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -506,7 +691,19 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..2]).is_err());
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..2], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let instruction = instruction::authorize_with_seed(
             &keys[2],
@@ -517,7 +714,7 @@ mod test {
             StakeAuthorize::Withdrawer,
             Some(&keys[1]),
         );
-        let message = Message::new(&[instruction], None);
+        let mut message = Message::new(&[instruction], None);
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..4]).unwrap(),
             ParsedInstructionEnum {
@@ -534,7 +731,20 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..3]).is_err());
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..3], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        message.instructions[0].accounts.pop();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
     }
 
     #[test]
@@ -597,7 +807,7 @@ mod test {
             custodian: Some(custodian),
         };
         let instruction = instruction::set_lockup(&keys[1], &lockup, &keys[0]);
-        let message = Message::new(&[instruction], None);
+        let mut message = Message::new(&[instruction], None);
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..2]).unwrap(),
             ParsedInstructionEnum {
@@ -614,7 +824,18 @@ mod test {
             }
         );
 
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..1]).is_err());
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&keys[0..1], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let lockup = LockupArgs {
             unix_timestamp: Some(unix_timestamp),
@@ -643,7 +864,7 @@ mod test {
             custodian: None,
         };
         let instruction = instruction::set_lockup_checked(&keys[1], &lockup, &keys[0]);
-        let message = Message::new(&[instruction], None);
+        let mut message = Message::new(&[instruction], None);
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..2]).unwrap(),
             ParsedInstructionEnum {
@@ -658,7 +879,18 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..1]).is_err());
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&keys[0..1], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let lockup = LockupArgs {
             unix_timestamp: Some(unix_timestamp),
@@ -666,7 +898,7 @@ mod test {
             custodian: Some(keys[1]),
         };
         let instruction = instruction::set_lockup_checked(&keys[2], &lockup, &keys[0]);
-        let message = Message::new(&[instruction], None);
+        let mut message = Message::new(&[instruction], None);
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -682,7 +914,19 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..2]).is_err());
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&keys[0..2], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
     }
 
     #[test]
@@ -700,8 +944,13 @@ mod test {
         let lamports = 55;
 
         let instructions =
+<<<<<<< HEAD
             instruction::create_account_checked(&keys[0], &keys[1], &authorized, lamports);
         let message = Message::new(&instructions, None);
+=======
+            instruction::create_account_checked(&from_pubkey, &stake_pubkey, &authorized, lamports);
+        let mut message = Message::new(&instructions, None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_stake(&message.instructions[1], &keys[0..4]).unwrap(),
             ParsedInstructionEnum {
@@ -714,7 +963,26 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[1], &keys[0..3]).is_err());
+=======
+        assert!(parse_stake(
+            &message.instructions[1],
+            &AccountKeys::new(&message.account_keys[0..3], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_stake_authorize_checked_ix() {
+        let stake_pubkey = Pubkey::new_unique();
+        let authorized_pubkey = Pubkey::new_unique();
+        let new_authorized_pubkey = Pubkey::new_unique();
+        let custodian_pubkey = Pubkey::new_unique();
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let instruction = instruction::authorize_checked(
             &keys[2],
@@ -723,7 +991,7 @@ mod test {
             StakeAuthorize::Staker,
             None,
         );
-        let message = Message::new(&[instruction], None);
+        let mut message = Message::new(&[instruction], None);
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..4]).unwrap(),
             ParsedInstructionEnum {
@@ -737,7 +1005,19 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..3]).is_err());
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..3], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let instruction = instruction::authorize_checked(
             &keys[3],
@@ -746,7 +1026,7 @@ mod test {
             StakeAuthorize::Withdrawer,
             Some(&keys[2]),
         );
-        let message = Message::new(&[instruction], None);
+        let mut message = Message::new(&[instruction], None);
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..5]).unwrap(),
             ParsedInstructionEnum {
@@ -761,7 +1041,28 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..4]).is_err());
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..4], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_stake_authorize_checked_with_seed_ix() {
+        let stake_pubkey = Pubkey::new_unique();
+        let authority_base_pubkey = Pubkey::new_unique();
+        let authority_owner_pubkey = Pubkey::new_unique();
+        let new_authorized_pubkey = Pubkey::new_unique();
+        let custodian_pubkey = Pubkey::new_unique();
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let seed = "test_seed";
         let instruction = instruction::authorize_checked_with_seed(
@@ -773,7 +1074,7 @@ mod test {
             StakeAuthorize::Staker,
             None,
         );
-        let message = Message::new(&[instruction], None);
+        let mut message = Message::new(&[instruction], None);
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..4]).unwrap(),
             ParsedInstructionEnum {
@@ -789,7 +1090,19 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..3]).is_err());
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..3], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let instruction = instruction::authorize_checked_with_seed(
             &keys[3],
@@ -800,7 +1113,7 @@ mod test {
             StakeAuthorize::Withdrawer,
             Some(&keys[2]),
         );
-        let message = Message::new(&[instruction], None);
+        let mut message = Message::new(&[instruction], None);
         assert_eq!(
             parse_stake(&message.instructions[0], &keys[0..5]).unwrap(),
             ParsedInstructionEnum {
@@ -817,6 +1130,18 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_stake(&message.instructions[0], &keys[0..4]).is_err());
+=======
+        assert!(parse_stake(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..4], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        message.instructions[0].accounts.pop();
+        assert!(parse_stake(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
     }
 }

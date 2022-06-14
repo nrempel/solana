@@ -74,6 +74,59 @@ mod test {
         }
     }
 
+<<<<<<< HEAD
+=======
+    fn convert_account_keys(message: &Message) -> Vec<Pubkey> {
+        message
+            .account_keys
+            .iter()
+            .map(pubkey_from_spl_token)
+            .collect()
+    }
+
+    #[test]
+    fn test_parse_associated_token_deprecated() {
+        let funder = Pubkey::new_unique();
+        let wallet_address = Pubkey::new_unique();
+        let mint = Pubkey::new_unique();
+        let associated_account_address =
+            get_associated_token_address(&convert_pubkey(wallet_address), &convert_pubkey(mint));
+        #[allow(deprecated)]
+        let create_ix = create_associated_token_account_deprecated(
+            &convert_pubkey(funder),
+            &convert_pubkey(wallet_address),
+            &convert_pubkey(mint),
+        );
+        let message = Message::new(&[create_ix], None);
+        let mut compiled_instruction = convert_compiled_instruction(&message.instructions[0]);
+        assert_eq!(
+            parse_associated_token(
+                &compiled_instruction,
+                &AccountKeys::new(&convert_account_keys(&message), None)
+            )
+            .unwrap(),
+            ParsedInstructionEnum {
+                instruction_type: "create".to_string(),
+                info: json!({
+                    "source": funder.to_string(),
+                    "account": associated_account_address.to_string(),
+                    "wallet": wallet_address.to_string(),
+                    "mint": mint.to_string(),
+                    "systemProgram": solana_sdk::system_program::id().to_string(),
+                    "tokenProgram": spl_token::id().to_string(),
+                    "rentSysvar": sysvar::rent::id().to_string(),
+                })
+            }
+        );
+        compiled_instruction.accounts.pop();
+        assert!(parse_associated_token(
+            &compiled_instruction,
+            &AccountKeys::new(&convert_account_keys(&message), None)
+        )
+        .is_err());
+    }
+
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
     #[test]
     fn test_parse_associated_token() {
         let mut keys: Vec<Pubkey> = vec![];
@@ -87,7 +140,7 @@ mod test {
             &convert_pubkey(keys[2]),
         );
         let message = Message::new(&[create_ix], None);
-        let compiled_instruction = convert_compiled_instruction(&message.instructions[0]);
+        let mut compiled_instruction = convert_compiled_instruction(&message.instructions[0]);
         assert_eq!(
             parse_associated_token(&compiled_instruction, &keys).unwrap(),
             ParsedInstructionEnum {
@@ -103,5 +156,11 @@ mod test {
                 })
             }
         );
+        compiled_instruction.accounts.pop();
+        assert!(parse_associated_token(
+            &compiled_instruction,
+            &AccountKeys::new(&convert_account_keys(&message), None)
+        )
+        .is_err());
     }
 }

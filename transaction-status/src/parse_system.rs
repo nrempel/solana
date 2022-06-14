@@ -122,7 +122,7 @@ pub fn parse_system(
             })
         }
         SystemInstruction::AuthorizeNonceAccount(authority) => {
-            check_num_system_accounts(&instruction.accounts, 1)?;
+            check_num_system_accounts(&instruction.accounts, 2)?;
             Ok(ParsedInstructionEnum {
                 instruction_type: "authorizeNonce".to_string(),
                 info: json!({
@@ -224,9 +224,20 @@ mod test {
         let lamports = 55;
         let space = 128;
 
+<<<<<<< HEAD
         let instruction =
             system_instruction::create_account(&keys[0], &keys[1], lamports, space, &keys[2]);
         let message = Message::new(&[instruction], None);
+=======
+        let instruction = system_instruction::create_account(
+            &from_pubkey,
+            &to_pubkey,
+            lamports,
+            space,
+            &owner_pubkey,
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_system(&message.instructions[0], &keys[0..2]).unwrap(),
             ParsedInstructionEnum {
@@ -240,10 +251,29 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_system(&message.instructions[0], &keys[0..1]).is_err());
 
         let instruction = system_instruction::assign(&keys[0], &keys[1]);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_system(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..1], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_system(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_system_assign_ix() {
+        let account_pubkey = Pubkey::new_unique();
+        let owner_pubkey = Pubkey::new_unique();
+        let instruction = system_instruction::assign(&account_pubkey, &owner_pubkey);
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_system(&message.instructions[0], &keys[0..1]).unwrap(),
             ParsedInstructionEnum {
@@ -254,10 +284,26 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_system(&message.instructions[0], &[]).is_err());
 
         let instruction = system_instruction::transfer(&keys[0], &keys[1], lamports);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_system(&message.instructions[0], &AccountKeys::new(&[], None)).is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_system(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_system_transfer_ix() {
+        let lamports = 55;
+        let from_pubkey = Pubkey::new_unique();
+        let to_pubkey = Pubkey::new_unique();
+        let instruction = system_instruction::transfer(&from_pubkey, &to_pubkey, lamports);
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_system(&message.instructions[0], &keys[0..2]).unwrap(),
             ParsedInstructionEnum {
@@ -269,13 +315,25 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_system(&message.instructions[0], &keys[0..1]).is_err());
+=======
+        assert!(parse_system(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..1], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_system(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let seed = "test_seed";
         let instruction = system_instruction::create_account_with_seed(
             &keys[0], &keys[2], &keys[1], seed, lamports, space, &keys[3],
         );
-        let message = Message::new(&[instruction], None);
+        let mut message = Message::new(&[instruction], None);
         assert_eq!(
             parse_system(&message.instructions[0], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -292,6 +350,7 @@ mod test {
             }
         );
 
+<<<<<<< HEAD
         let seed = "test_seed";
         let instruction = system_instruction::create_account_with_seed(
             &keys[0], &keys[1], &keys[0], seed, lamports, space, &keys[3],
@@ -316,6 +375,25 @@ mod test {
 
         let instruction = system_instruction::allocate(&keys[0], space);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_system(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..1], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        message.instructions[0].accounts.pop();
+        assert!(parse_system(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_system_allocate_ix() {
+        let space = 128;
+        let account_pubkey = Pubkey::new_unique();
+        let instruction = system_instruction::allocate(&account_pubkey, space);
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_system(&message.instructions[0], &keys[0..1]).unwrap(),
             ParsedInstructionEnum {
@@ -326,11 +404,35 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_system(&message.instructions[0], &[]).is_err());
 
         let instruction =
             system_instruction::allocate_with_seed(&keys[1], &keys[0], seed, space, &keys[2]);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_system(&message.instructions[0], &AccountKeys::new(&[], None)).is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_system(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_system_allocate_with_seed_ix() {
+        let space = 128;
+        let seed = "test_seed";
+        let account_pubkey = Pubkey::new_unique();
+        let base_pubkey = Pubkey::new_unique();
+        let owner_pubkey = Pubkey::new_unique();
+        let instruction = system_instruction::allocate_with_seed(
+            &account_pubkey,
+            &base_pubkey,
+            seed,
+            space,
+            &owner_pubkey,
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_system(&message.instructions[0], &keys[0..2]).unwrap(),
             ParsedInstructionEnum {
@@ -344,10 +446,36 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_system(&message.instructions[0], &keys[0..1]).is_err());
 
         let instruction = system_instruction::assign_with_seed(&keys[1], &keys[0], seed, &keys[2]);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_system(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..1], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_system(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_system_assign_with_seed_ix() {
+        let seed = "test_seed";
+        let account_pubkey = Pubkey::new_unique();
+        let base_pubkey = Pubkey::new_unique();
+        let owner_pubkey = Pubkey::new_unique();
+        let instruction = system_instruction::assign_with_seed(
+            &account_pubkey,
+            &base_pubkey,
+            seed,
+            &owner_pubkey,
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_system(&message.instructions[0], &keys[0..2]).unwrap(),
             ParsedInstructionEnum {
@@ -360,7 +488,19 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_system(&message.instructions[0], &keys[0..1]).is_err());
+=======
+        assert!(parse_system(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..1], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_system(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let instruction = system_instruction::transfer_with_seed(
             &keys[1],
@@ -370,7 +510,7 @@ mod test {
             &keys[2],
             lamports,
         );
-        let message = Message::new(&[instruction], None);
+        let mut message = Message::new(&[instruction], None);
         assert_eq!(
             parse_system(&message.instructions[0], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -385,7 +525,18 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_system(&message.instructions[0], &keys[0..2]).is_err());
+=======
+        assert!(parse_system(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..2], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_system(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
     }
 
     #[test]
@@ -396,8 +547,14 @@ mod test {
             keys.push(solana_sdk::pubkey::new_rand());
         }
 
+<<<<<<< HEAD
         let instruction = system_instruction::advance_nonce_account(&keys[1], &keys[0]);
         let message = Message::new(&[instruction], None);
+=======
+        let instruction =
+            system_instruction::advance_nonce_account(&nonce_pubkey, &authorized_pubkey);
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_system(&message.instructions[0], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -409,12 +566,39 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_system(&message.instructions[0], &keys[0..2]).is_err());
 
         let lamports = 55;
         let instruction =
             system_instruction::withdraw_nonce_account(&keys[1], &keys[0], &keys[2], lamports);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_system(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..2], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_system(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_system_withdraw_nonce_account_ix() {
+        let nonce_pubkey = Pubkey::new_unique();
+        let authorized_pubkey = Pubkey::new_unique();
+        let to_pubkey = Pubkey::new_unique();
+
+        let lamports = 55;
+        let instruction = system_instruction::withdraw_nonce_account(
+            &nonce_pubkey,
+            &authorized_pubkey,
+            &to_pubkey,
+            lamports,
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_system(&message.instructions[0], &keys[0..5]).unwrap(),
             ParsedInstructionEnum {
@@ -429,11 +613,38 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_system(&message.instructions[0], &keys[0..4]).is_err());
 
         let instructions =
             system_instruction::create_nonce_account(&keys[0], &keys[1], &keys[4], lamports);
         let message = Message::new(&instructions, None);
+=======
+        assert!(parse_system(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..4], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_system(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_system_initialize_nonce_ix() {
+        let lamports = 55;
+        let from_pubkey = Pubkey::new_unique();
+        let nonce_pubkey = Pubkey::new_unique();
+        let authorized_pubkey = Pubkey::new_unique();
+
+        let instructions = system_instruction::create_nonce_account(
+            &from_pubkey,
+            &nonce_pubkey,
+            &authorized_pubkey,
+            lamports,
+        );
+        let mut message = Message::new(&instructions, None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_system(&message.instructions[1], &keys[0..4]).unwrap(),
             ParsedInstructionEnum {
@@ -446,10 +657,35 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_system(&message.instructions[1], &keys[0..3]).is_err());
 
         let instruction = system_instruction::authorize_nonce_account(&keys[1], &keys[0], &keys[2]);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_system(
+            &message.instructions[1],
+            &AccountKeys::new(&message.account_keys[0..3], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_system(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_system_authorize_nonce_account_ix() {
+        let nonce_pubkey = Pubkey::new_unique();
+        let authorized_pubkey = Pubkey::new_unique();
+        let new_authority_pubkey = Pubkey::new_unique();
+
+        let instruction = system_instruction::authorize_nonce_account(
+            &nonce_pubkey,
+            &authorized_pubkey,
+            &new_authority_pubkey,
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_system(&message.instructions[0], &keys[0..2]).unwrap(),
             ParsedInstructionEnum {
@@ -461,6 +697,17 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_system(&message.instructions[0], &keys[0..1]).is_err());
+=======
+        assert!(parse_system(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..1], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_system(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
     }
 }

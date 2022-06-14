@@ -22,20 +22,26 @@ pub fn parse_bpf_loader(
         ));
     }
     match bpf_loader_instruction {
-        LoaderInstruction::Write { offset, bytes } => Ok(ParsedInstructionEnum {
-            instruction_type: "write".to_string(),
-            info: json!({
-                "offset": offset,
-                "bytes": base64::encode(bytes),
-                "account": account_keys[instruction.accounts[0] as usize].to_string(),
-            }),
-        }),
-        LoaderInstruction::Finalize => Ok(ParsedInstructionEnum {
-            instruction_type: "finalize".to_string(),
-            info: json!({
-                "account": account_keys[instruction.accounts[0] as usize].to_string(),
-            }),
-        }),
+        LoaderInstruction::Write { offset, bytes } => {
+            check_num_bpf_loader_accounts(&instruction.accounts, 1)?;
+            Ok(ParsedInstructionEnum {
+                instruction_type: "write".to_string(),
+                info: json!({
+                    "offset": offset,
+                    "bytes": base64::encode(bytes),
+                    "account": account_keys[instruction.accounts[0] as usize].to_string(),
+                }),
+            })
+        }
+        LoaderInstruction::Finalize => {
+            check_num_bpf_loader_accounts(&instruction.accounts, 2)?;
+            Ok(ParsedInstructionEnum {
+                instruction_type: "finalize".to_string(),
+                info: json!({
+                    "account": account_keys[instruction.accounts[0] as usize].to_string(),
+                }),
+            })
+        }
     }
 }
 
@@ -147,6 +153,10 @@ pub fn parse_bpf_upgradeable_loader(
     }
 }
 
+fn check_num_bpf_loader_accounts(accounts: &[u8], num: usize) -> Result<(), ParseInstructionError> {
+    check_num_accounts(accounts, num, ParsableProgram::BpfLoader)
+}
+
 fn check_num_bpf_upgradeable_loader_accounts(
     accounts: &[u8],
     num: usize,
@@ -178,7 +188,7 @@ mod test {
             offset,
             bytes.clone(),
         );
-        let message = Message::new(&[instruction], Some(&fee_payer));
+        let mut message = Message::new(&[instruction], Some(&fee_payer));
         assert_eq!(
             parse_bpf_loader(&message.instructions[0], &account_keys).unwrap(),
             ParsedInstructionEnum {
@@ -190,10 +200,24 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_bpf_loader(&message.instructions[0], &missing_account_keys).is_err());
+=======
+        assert!(parse_bpf_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&missing_account_keys, None)
+        )
+        .is_err());
+        message.instructions[0].accounts.pop();
+        assert!(parse_bpf_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&account_keys, None)
+        )
+        .is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let instruction = solana_sdk::loader_instruction::finalize(&account_pubkey, &program_id);
-        let message = Message::new(&[instruction], Some(&fee_payer));
+        let mut message = Message::new(&[instruction], Some(&fee_payer));
         assert_eq!(
             parse_bpf_loader(&message.instructions[0], &account_keys).unwrap(),
             ParsedInstructionEnum {
@@ -203,7 +227,21 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_bpf_loader(&message.instructions[0], &missing_account_keys).is_err());
+=======
+        assert!(parse_bpf_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&missing_account_keys, None)
+        )
+        .is_err());
+        message.instructions[0].accounts.pop();
+        assert!(parse_bpf_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&account_keys, None)
+        )
+        .is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let bad_compiled_instruction = CompiledInstruction {
             program_id_index: 3,
@@ -238,7 +276,7 @@ mod test {
             max_data_len,
         )
         .unwrap();
-        let message = Message::new(&instructions, None);
+        let mut message = Message::new(&instructions, None);
         assert_eq!(
             parse_bpf_upgradeable_loader(&message.instructions[1], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -249,11 +287,43 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_bpf_upgradeable_loader(&message.instructions[1], &keys[0..2]).is_err());
 
         let instruction =
             solana_sdk::bpf_loader_upgradeable::write(&keys[1], &keys[0], offset, bytes.clone());
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[1],
+            &AccountKeys::new(&message.account_keys[0..2], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[1].accounts.pop();
+        message.instructions[1].accounts.pop();
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[1],
+            &AccountKeys::new(&keys, None)
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn test_parse_bpf_upgradeable_loader_write_ix() {
+        let offset = 4242;
+        let bytes = vec![8; 99];
+
+        let buffer_address = Pubkey::new_unique();
+        let authority_address = Pubkey::new_unique();
+        let instruction = bpf_loader_upgradeable::write(
+            &buffer_address,
+            &authority_address,
+            offset,
+            bytes.clone(),
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_bpf_upgradeable_loader(&message.instructions[0], &keys[0..2]).unwrap(),
             ParsedInstructionEnum {
@@ -266,7 +336,23 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_bpf_upgradeable_loader(&message.instructions[0], &keys[0..1]).is_err());
+=======
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..1], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&keys, None)
+        )
+        .is_err());
+    }
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let instructions = solana_sdk::bpf_loader_upgradeable::deploy_with_max_program_len(
             &keys[0],
@@ -277,7 +363,7 @@ mod test {
             max_data_len,
         )
         .unwrap();
-        let message = Message::new(&instructions, None);
+        let mut message = Message::new(&instructions, None);
         assert_eq!(
             parse_bpf_upgradeable_loader(&message.instructions[1], &keys[0..8]).unwrap(),
             ParsedInstructionEnum {
@@ -295,11 +381,46 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_bpf_upgradeable_loader(&message.instructions[1], &keys[0..7]).is_err());
 
         let instruction =
             solana_sdk::bpf_loader_upgradeable::upgrade(&keys[2], &keys[3], &keys[0], &keys[4]);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[1],
+            &AccountKeys::new(&message.account_keys[0..7], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[1].accounts.pop();
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[1],
+            &AccountKeys::new(&keys, None)
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn test_parse_bpf_upgradeable_loader_upgrade_ix() {
+        let program_address = Pubkey::new_unique();
+        let buffer_address = Pubkey::new_unique();
+        let authority_address = Pubkey::new_unique();
+        let spill_address = Pubkey::new_unique();
+        let programdata_address = Pubkey::find_program_address(
+            &[program_address.as_ref()],
+            &bpf_loader_upgradeable::id(),
+        )
+        .0;
+        let instruction = bpf_loader_upgradeable::upgrade(
+            &program_address,
+            &buffer_address,
+            &authority_address,
+            &spill_address,
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_bpf_upgradeable_loader(&message.instructions[0], &keys[0..7]).unwrap(),
             ParsedInstructionEnum {
@@ -315,11 +436,39 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_bpf_upgradeable_loader(&message.instructions[0], &keys[0..6]).is_err());
 
         let instruction =
             solana_sdk::bpf_loader_upgradeable::set_buffer_authority(&keys[1], &keys[0], &keys[2]);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..6], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&keys, None)
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn test_parse_bpf_upgradeable_loader_set_buffer_authority_ix() {
+        let buffer_address = Pubkey::new_unique();
+        let current_authority_address = Pubkey::new_unique();
+        let new_authority_address = Pubkey::new_unique();
+        let instruction = bpf_loader_upgradeable::set_buffer_authority(
+            &buffer_address,
+            &current_authority_address,
+            &new_authority_address,
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_bpf_upgradeable_loader(&message.instructions[0], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -331,14 +480,31 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_bpf_upgradeable_loader(&message.instructions[0], &keys[0..1]).is_err());
+=======
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..1], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        message.instructions[0].accounts.pop();
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&keys, None)
+        )
+        .is_err());
+    }
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let instruction = solana_sdk::bpf_loader_upgradeable::set_upgrade_authority(
             &keys[1],
             &keys[0],
             Some(&keys[2]),
         );
-        let message = Message::new(&[instruction], None);
+        let mut message = Message::new(&[instruction], None);
         assert_eq!(
             parse_bpf_upgradeable_loader(&message.instructions[0], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -350,11 +516,34 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_bpf_upgradeable_loader(&message.instructions[0], &keys[0..1]).is_err());
 
         let instruction =
             solana_sdk::bpf_loader_upgradeable::set_upgrade_authority(&keys[1], &keys[0], None);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..1], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        message.instructions[0].accounts.pop();
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&keys, None)
+        )
+        .is_err());
+
+        let instruction = bpf_loader_upgradeable::set_upgrade_authority(
+            &program_address,
+            &current_authority_address,
+            None,
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_bpf_upgradeable_loader(&message.instructions[0], &keys[0..2]).unwrap(),
             ParsedInstructionEnum {
@@ -366,10 +555,35 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_bpf_upgradeable_loader(&message.instructions[0], &keys[0..1]).is_err());
 
         let instruction = solana_sdk::bpf_loader_upgradeable::close(&keys[0], &keys[1], &keys[2]);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..1], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&keys, None)
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn test_parse_bpf_upgradeable_loader_close_ix() {
+        let close_address = Pubkey::new_unique();
+        let recipient_address = Pubkey::new_unique();
+        let authority_address = Pubkey::new_unique();
+        let instruction =
+            bpf_loader_upgradeable::close(&close_address, &recipient_address, &authority_address);
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_bpf_upgradeable_loader(&message.instructions[0], &keys[..3]).unwrap(),
             ParsedInstructionEnum {
@@ -381,6 +595,21 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_bpf_upgradeable_loader(&message.instructions[0], &keys[0..1]).is_err());
+=======
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..1], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_bpf_upgradeable_loader(
+            &message.instructions[0],
+            &AccountKeys::new(&keys, None)
+        )
+        .is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
     }
 }

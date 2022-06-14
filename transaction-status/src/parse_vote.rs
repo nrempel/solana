@@ -186,7 +186,7 @@ mod test {
             &vote_init,
             lamports,
         );
-        let message = Message::new(&instructions, None);
+        let mut message = Message::new(&instructions, None);
         assert_eq!(
             parse_vote(&message.instructions[1], &keys[0..5]).unwrap(),
             ParsedInstructionEnum {
@@ -202,11 +202,33 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_vote(&message.instructions[1], &keys[0..3]).is_err());
+=======
+        assert!(parse_vote(
+            &message.instructions[1],
+            &AccountKeys::new(&message.account_keys[0..3], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_vote(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let authority_type = VoteAuthorize::Voter;
+<<<<<<< HEAD
         let instruction = vote_instruction::authorize(&keys[1], &keys[0], &keys[3], authority_type);
         let message = Message::new(&[instruction], None);
+=======
+        let instruction = vote_instruction::authorize(
+            &vote_pubkey,
+            &authorized_pubkey,
+            &new_authorized_pubkey,
+            authority_type,
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_vote(&message.instructions[0], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -220,10 +242,36 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_vote(&message.instructions[0], &keys[0..2]).is_err());
 
         let instruction = vote_instruction::vote(&keys[1], &keys[0], vote.clone());
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_vote(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..2], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_vote(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_vote_ix() {
+        let hash = Hash::new_from_array([1; 32]);
+        let vote = Vote {
+            slots: vec![1, 2, 4],
+            hash,
+            timestamp: Some(1_234_567_890),
+        };
+
+        let vote_pubkey = Pubkey::new_unique();
+        let authorized_voter_pubkey = Pubkey::new_unique();
+        let instruction = vote_instruction::vote(&vote_pubkey, &authorized_voter_pubkey, vote);
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_vote(&message.instructions[0], &keys[0..4]).unwrap(),
             ParsedInstructionEnum {
@@ -241,10 +289,36 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_vote(&message.instructions[0], &keys[0..3]).is_err());
 
         let instruction = vote_instruction::withdraw(&keys[1], &keys[0], lamports, &keys[2]);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_vote(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..3], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_vote(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_vote_withdraw_ix() {
+        let lamports = 55;
+        let vote_pubkey = Pubkey::new_unique();
+        let authorized_withdrawer_pubkey = Pubkey::new_unique();
+        let to_pubkey = Pubkey::new_unique();
+        let instruction = vote_instruction::withdraw(
+            &vote_pubkey,
+            &authorized_withdrawer_pubkey,
+            lamports,
+            &to_pubkey,
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_vote(&message.instructions[0], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -257,10 +331,34 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_vote(&message.instructions[0], &keys[0..2]).is_err());
 
         let instruction = vote_instruction::update_validator_identity(&keys[2], &keys[1], &keys[0]);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_vote(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..2], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_vote(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_vote_update_validator_identity_ix() {
+        let vote_pubkey = Pubkey::new_unique();
+        let authorized_withdrawer_pubkey = Pubkey::new_unique();
+        let node_pubkey = Pubkey::new_unique();
+        let instruction = vote_instruction::update_validator_identity(
+            &vote_pubkey,
+            &authorized_withdrawer_pubkey,
+            &node_pubkey,
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_vote(&message.instructions[0], &keys[0..3]).unwrap(),
             ParsedInstructionEnum {
@@ -272,10 +370,34 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_vote(&message.instructions[0], &keys[0..2]).is_err());
 
         let instruction = vote_instruction::update_commission(&keys[1], &keys[0], commission);
         let message = Message::new(&[instruction], None);
+=======
+        assert!(parse_vote(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..2], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_vote(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+
+    #[test]
+    fn test_parse_vote_update_commission_ix() {
+        let commission = 10;
+        let vote_pubkey = Pubkey::new_unique();
+        let authorized_withdrawer_pubkey = Pubkey::new_unique();
+        let instruction = vote_instruction::update_commission(
+            &vote_pubkey,
+            &authorized_withdrawer_pubkey,
+            commission,
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_vote(&message.instructions[0], &keys[0..2]).unwrap(),
             ParsedInstructionEnum {
@@ -287,11 +409,29 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_vote(&message.instructions[0], &keys[0..1]).is_err());
+=======
+        assert!(parse_vote(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..1], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_vote(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let proof_hash = Hash::new_from_array([2; 32]);
+<<<<<<< HEAD
         let instruction = vote_instruction::vote_switch(&keys[1], &keys[0], vote, proof_hash);
         let message = Message::new(&[instruction], None);
+=======
+        let instruction =
+            vote_instruction::vote_switch(&vote_pubkey, &authorized_voter_pubkey, vote, proof_hash);
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_vote(&message.instructions[0], &keys[0..4]).unwrap(),
             ParsedInstructionEnum {
@@ -310,12 +450,34 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_vote(&message.instructions[0], &keys[0..3]).is_err());
+=======
+        assert!(parse_vote(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..3], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_vote(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+    }
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
 
         let authority_type = VoteAuthorize::Voter;
+<<<<<<< HEAD
         let instruction =
             vote_instruction::authorize_checked(&keys[1], &keys[0], &keys[3], authority_type);
         let message = Message::new(&[instruction], None);
+=======
+        let instruction = vote_instruction::authorize_checked(
+            &vote_pubkey,
+            &authorized_pubkey,
+            &new_authorized_pubkey,
+            authority_type,
+        );
+        let mut message = Message::new(&[instruction], None);
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
         assert_eq!(
             parse_vote(&message.instructions[0], &keys[0..4]).unwrap(),
             ParsedInstructionEnum {
@@ -329,6 +491,17 @@ mod test {
                 }),
             }
         );
+<<<<<<< HEAD
         assert!(parse_vote(&message.instructions[0], &keys[0..3]).is_err());
+=======
+        assert!(parse_vote(
+            &message.instructions[0],
+            &AccountKeys::new(&message.account_keys[0..3], None)
+        )
+        .is_err());
+        let keys = message.account_keys.clone();
+        message.instructions[0].accounts.pop();
+        assert!(parse_vote(&message.instructions[0], &AccountKeys::new(&keys, None)).is_err());
+>>>>>>> 7b786ff33 (RPC instruction parser tests are missing some cases (#25951))
     }
 }
